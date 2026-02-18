@@ -70,14 +70,19 @@ jobs:
           docker images sqlserver-connect:latest
           docker inspect sqlserver-connect:latest
       
+      # Note: Multi-stage build may fail due to SSL certificate issues when Maven
+      # downloads dependencies inside Docker. This is a known issue documented in
+      # Dockerfile.multistage. The build is marked as optional since the standard
+      # Dockerfile is the primary build method (build JAR first, then containerize).
       - name: Build Docker image (multi-stage)
         continue-on-error: true
+        id: multistage-build
         run: |
           docker build -t sqlserver-connect:multistage -f Dockerfile.multistage .
           echo "Multi-stage Docker image built successfully"
       
       - name: Verify multi-stage Docker image
-        continue-on-error: true
+        if: steps.multistage-build.outcome == 'success'
         run: |
           docker images sqlserver-connect:multistage
           docker inspect sqlserver-connect:multistage
