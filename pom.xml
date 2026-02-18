@@ -17,7 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <mssql-jdbc.version>12.6.1.jre11</mssql-jdbc.version>
+        <mssql-jdbc.version>12.8.2.jre11</mssql-jdbc.version>
     </properties>
 
     <dependencies>
