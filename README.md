@@ -53,7 +53,13 @@ The application uses the following environment variables for configuration:
 The easiest way to run the demo is using Docker Compose, which will start both SQL Server and the Java application:
 
 ```bash
-# Build and run both SQL Server and the application
+# Option 1: Use default demo credentials (hardcoded in docker-compose.yml)
+docker-compose up --build
+
+# Option 2: Use .env file for credentials (recommended)
+# Copy the example file and edit with your values
+cp .env.example .env
+# Edit .env with your preferred credentials
 docker-compose up --build
 
 # View logs
@@ -62,6 +68,8 @@ docker-compose logs -f app
 # Stop and remove containers
 docker-compose down
 ```
+
+**Note:** For production use, always use a `.env` file or Docker secrets instead of hardcoded credentials.
 
 This will:
 1. Start a SQL Server 2022 container with SA authentication
@@ -196,8 +204,8 @@ env_file:
 
 3. **Test connection manually:**
    ```bash
-   docker exec -it sqlserver-demo /opt/mssql-tools/bin/sqlcmd \
-     -S localhost -U sa -P 'Your_strong_Passw0rd!' -Q 'SELECT 1'
+   docker exec -it sqlserver-demo /opt/mssql-tools18/bin/sqlcmd \
+     -S localhost -U sa -P 'Your_strong_Passw0rd!' -Q 'SELECT 1' -C
    ```
 
 ### Authentication Errors

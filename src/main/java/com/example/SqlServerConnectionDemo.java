@@ -97,6 +97,13 @@ public class SqlServerConnectionDemo {
     /**
      * Build the JDBC connection URL based on the provided parameters.
      * Supports both standard SQL authentication and Active Directory authentication.
+     * 
+     * NOTE: The current configuration uses encrypt=false and trustServerCertificate=true
+     * which is suitable for local development and demo purposes only.
+     * In production environments, you should:
+     * - Set encrypt=true
+     * - Set trustServerCertificate=false
+     * - Properly configure SSL/TLS certificates
      */
     private static String buildJdbcUrl(String host, String port, String database, 
                                        String user, String password, String domain) {

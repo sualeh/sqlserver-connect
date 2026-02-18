@@ -43,6 +43,9 @@ out/
 dist/
 bin/
 
+# Environment files with secrets
+.env
+
 # Logs
 logs/
 *.log
