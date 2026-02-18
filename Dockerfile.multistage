@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for SQL Server Connection Demo
 # This is an alternative Dockerfile that builds from source in Docker
-# Use this if you have proper SSL certificates configured in your Docker environment
+# Includes CA certificates for Active Directory and Entra authentication
 
 # Stage 1: Build stage using Maven
 FROM maven:3.9-eclipse-temurin-17 AS builder
@@ -18,9 +18,16 @@ RUN mvn clean package -DskipTests -B
 RUN ls -lh /build/target/*.jar
 
 # Stage 2: Runtime stage with JRE
+# Note: eclipse-temurin base images include CA certificates by default
 FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
+
+# The base image includes CA certificates for SSL/TLS connections
+# This is required for Active Directory and Entra authentication with encryption enabled
+# If you need to update or add custom certificates, you can:
+# - For updated system certs: RUN apk update && apk add --no-cache ca-certificates
+# - For custom certs: COPY mycacerts /app/security/cacerts and set JAVA_OPTS
 
 # Copy the built JAR from builder stage
 COPY --from=builder /build/target/sqlserver-connect.jar /app/sqlserver-connect.jar
