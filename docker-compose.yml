@@ -1,0 +1,56 @@
+version: '3.9'
+
+services:
+  # SQL Server service
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver-demo
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Your_strong_Passw0rd!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Your_strong_Passw0rd!' -Q 'SELECT 1' || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - sqlserver-network
+
+  # Java application service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sqlserver-app
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      # SQL Server connection parameters
+      - SQLSERVER_HOST=sqlserver
+      - SQLSERVER_PORT=1433
+      - SQLSERVER_DB=master
+      # Authentication credentials
+      # NOTE: For SQL Server authentication (SA account), use:
+      - SQLSERVER_USER=sa
+      - SQLSERVER_PASSWORD=Your_strong_Passw0rd!
+      # NOTE: For Active Directory/Windows authentication, set:
+      # - SQLSERVER_USER=your_ad_username
+      # - SQLSERVER_PASSWORD=your_ad_password
+      # - SQLSERVER_DOMAIN=your_domain (optional)
+      #
+      # In production, these should be set via:
+      # 1. Docker secrets
+      # 2. External .env file (not committed to version control)
+      # 3. Container orchestration secrets (Kubernetes, Docker Swarm)
+      # 4. Environment variable injection at runtime
+    networks:
+      - sqlserver-network
+
+networks:
+  sqlserver-network:
+    driver: bridge
