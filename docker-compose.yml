@@ -1,0 +1,63 @@
+services:
+  # SQL Server service
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver-demo
+    environment:
+      - ACCEPT_EULA=Y
+      # WARNING: Hardcoded password for demo purposes only!
+      # In production, use: ${MSSQL_SA_PASSWORD} from .env file
+      # Or use Docker secrets for better security
+      - MSSQL_SA_PASSWORD=Your_strong_Passw0rd!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Your_strong_Passw0rd!' -Q 'SELECT 1' -C || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - sqlserver-network
+
+  # Java application service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sqlserver-app
+    restart: on-failure
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      # SQL Server connection parameters
+      - SQLSERVER_HOST=sqlserver
+      - SQLSERVER_PORT=1433
+      - SQLSERVER_DB=master
+      # Authentication credentials
+      # WARNING: Hardcoded credentials for demo purposes only!
+      # RECOMMENDED: Create a .env file (see .env.example) and use:
+      # - SQLSERVER_USER=${SQLSERVER_USER}
+      # - SQLSERVER_PASSWORD=${SQLSERVER_PASSWORD}
+      # The .env file is gitignored and won't be committed
+      - SQLSERVER_USER=sa
+      - SQLSERVER_PASSWORD=Your_strong_Passw0rd!
+      #
+      # For Active Directory/Windows authentication:
+      # - SQLSERVER_USER=your_ad_username
+      # - SQLSERVER_PASSWORD=your_ad_password
+      # - SQLSERVER_DOMAIN=your_domain (optional)
+      #
+      # In production environments, use:
+      # 1. Docker secrets (recommended for Docker Swarm)
+      # 2. External .env file (not committed to version control)
+      # 3. Container orchestration secrets (Kubernetes, etc.)
+      # 4. Environment variable injection at runtime
+    networks:
+      - sqlserver-network
+
+networks:
+  sqlserver-network:
+    driver: bridge
